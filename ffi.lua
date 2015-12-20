@@ -16,6 +16,7 @@ end
 
 ffi.cdef[[
 typedef vl_uint32 vl_type;
+typedef int                 vl_bool ;
 
 enum {
   VL_TYPE_FLOAT = 1,
@@ -132,6 +133,109 @@ void vl_kmeans_quantize(
   vl_size numData
 );
 ]]
+
+ffi.cdef [[
+	typedef enum _VlGMMInitialization
+	{
+		VlGMMKMeans, 
+		VlGMMRand,   
+		VlGMMCustom  
+	} VlGMMInitialization ;
+
+]]
+
+
+ffi.cdef [[
+	struct _VlGMM
+	{
+		vl_type dataType ;                  /**< Data type. */
+		vl_size dimension ;                 /**< Data dimensionality. */
+		vl_size numClusters ;               /**< Number of clusters  */
+		vl_size numData ;                   /**< Number of last time clustered data points.  */
+		vl_size maxNumIterations ;          /**< Maximum number of refinement iterations. */
+		vl_size numRepetitions   ;          /**< Number of clustering repetitions. */
+		int     verbosity ;                 /**< Verbosity level. */
+		void *  means;                      /**< Means of Gaussian modes. */
+		void *  covariances;                /**< Diagonals of covariance matrices of Gaussian modes. */
+		void *  priors;                     /**< Weights of Gaussian modes. */
+		void *  posteriors;                 /**< Probabilities of correspondences of points to clusters. */
+		double * sigmaLowBound ;            /**< Lower bound on the diagonal covariance values. */
+		VlGMMInitialization initialization; /**< Initialization option */
+		VlKMeans * kmeansInit;              /**< Kmeans object for initialization of gaussians */
+		double LL ;                         /**< Current solution loglikelihood */
+		vl_bool kmeansInitIsOwner; /**< Indicates whether a user provided the kmeans initialization object */
+	} ;
+	
+	typedef struct _VlGMM VlGMM ;
+	
+	VlGMM * 	vl_gmm_new (vl_type dataType, vl_size dimension, vl_size numComponents);
+	
+	void 	vl_gmm_reset (VlGMM *self);
+	
+	void vl_gmm_delete (VlGMM *self);
+	
+	vl_type vl_gmm_get_data_type (VlGMM const *self);
+	
+	vl_size vl_gmm_get_num_clusters (VlGMM const *self);
+	
+	vl_size vl_gmm_get_num_data (VlGMM const *self);
+	
+	double 	vl_gmm_get_loglikelihood (VlGMM const *self);
+	
+	int 	vl_gmm_get_verbosity (VlGMM const *self);
+	
+	void 	vl_gmm_set_verbosity (VlGMM *self, int verbosity);
+	
+	void const * 	vl_gmm_get_means (VlGMM const *self);
+	
+	void const * 	vl_gmm_get_covariances (VlGMM const *self);
+	
+	void const * 	vl_gmm_get_priors (VlGMM const *self);
+	
+	void const * 	vl_gmm_get_posteriors (VlGMM const *self);
+	
+	vl_size 	vl_gmm_get_max_num_iterations (VlGMM const *self);
+	
+	void 	vl_gmm_set_max_num_iterations (VlGMM *self, vl_size maxNumIterations);
+	
+	void 	vl_gmm_set_num_repetitions (VlGMM *self, vl_size numRepetitions);
+	
+	vl_size 	vl_gmm_get_dimension (VlGMM const *self);
+	
+	VlGMMInitialization 	vl_gmm_get_initialization (VlGMM const *self);
+	
+	void 	vl_gmm_set_initialization (VlGMM *self, VlGMMInitialization init);
+	
+	VlKMeans * 	vl_gmm_get_kmeans_init_object (VlGMM const *self);
+	
+	void 	vl_gmm_set_kmeans_init_object (VlGMM *self, VlKMeans *kmeans);
+	
+	double const * 	vl_gmm_get_covariance_lower_bounds (VlGMM const *self);
+	
+	void 	vl_gmm_set_covariance_lower_bounds (VlGMM *self, double const *bounds);
+	
+	void 	vl_gmm_set_covariance_lower_bound (VlGMM *self, double bound);
+	
+	VlGMM * 	vl_gmm_new_copy (VlGMM const *self);
+	
+	void 	vl_gmm_init_with_rand_data (VlGMM *self, void const *data, vl_size numData);
+	
+	void 	vl_gmm_init_with_kmeans (VlGMM *self, void const *data, vl_size numData, VlKMeans *kmeansInit);
+	
+	double 	vl_gmm_cluster (VlGMM *self, void const *data, vl_size numData);
+	
+	double 	vl_gmm_em (VlGMM *self, void const *data, vl_size numData);
+	
+	void 	vl_gmm_set_means (VlGMM *self, void const *means);
+	
+	void 	vl_gmm_set_covariances (VlGMM *self, void const *covariances);
+	
+	void 	vl_gmm_set_priors (VlGMM *self, void const *priors);
+	
+	vl_size 	vl_gmm_get_num_repetitions (VlGMM const *self);
+	
+	void free (void *) ;
+]] 
 
 -- RTLD_GLOBAL mode (cf. man 3 dlopen)
 local global = true
