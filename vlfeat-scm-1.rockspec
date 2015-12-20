@@ -25,5 +25,6 @@ build = {
       ['vlfeat.init']           = 'init.lua',
       ['vlfeat.ffi']            = 'ffi.lua',
       ['vlfeat.kmeans']         = 'kmeans.lua',
+	  ['vlfeat.gmm']         = 'gmm.lua',
    },
 }
